@@ -1,0 +1,54 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Dependency directories (vendored dependencies are in ./vendor, but this is for other cases)
+vendor/
+
+# Go workspace file
+go.work
+
+# Build artifacts
+bin/
+dist/
+
+# Temporary files
+*.tmp
+*.swp
+*~
+
+# Log files
+*.log
+
+# Editor/IDE specific files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Docker-related files
+docker-compose.override.yml
+*.dockerignore
+
+# Environment files (containing sensitive data)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Generated files (e.g., generated PDFs for testing)
+*.pdf
+
+# OS-specific files
+.DS_Store
+Thumbs.db
