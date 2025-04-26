@@ -180,19 +180,19 @@
             <div class="customer-info">
                 <div>
                     <h1 class="tile-header">مشتری</h1>
-                    <h2 class="tile-details">{{ .CustomerName }}</h2>
+                    <h2 class="tile-details">{{ .customer_name }}</h2>
                 </div>
                 <div>
                     <h1 class="tile-header">شماره مشتری</h1>
-                    <h2 class="tile-details">{{ .CustomerNumber }}</h2>
+                    <h2 class="tile-details">{{ .customer_number }}</h2>
                 </div>
                 <div>
                     <h1 class="tile-header">بانکدار</h1>
-                    <h2 class="tile-details">{{ .CustomerBankerName }}</h2>
+                    <h2 class="tile-details">{{ .customer_banker_name }}</h2>
                 </div>
                 <div>
                     <h1 class="tile-header">قرارداد یوبانک</h1>
-                    <h2 class="tile-details">{{ .CustomerHasUbankContract }}</h2>
+                    <h2 class="tile-details">{{ .customer_has_ubank_contract }}</h2>
                 </div>
             </div>
         </div>
@@ -203,34 +203,34 @@
             <div class="customer-info">
                 <div>
                     <h1 class="tile-header">نوع درخواست</h1>
-                    <h2 class="tile-details">{{ .ServiceRequestType }}</h2>
+                    <h2 class="tile-details">{{ .service_request_type }}</h2>
                 </div>
                 <div>
                     <h1 class="tile-header">عنوان درخواست</h1>
-                    <h2 class="tile-details">{{ .ServiceRequestTitle }}</h2>
+                    <h2 class="tile-details">{{ .service_request_title }}</h2>
                 </div>
                 <div>
                     <h1 class="tile-header">شماره درخواست</h1>
-                    <h2 class="tile-details">{{ .ServiceRequestNumber }}</h2>
+                    <h2 class="tile-details">{{ .service_request_number }}</h2>
                 </div>
                 <div>
                     <h1 class="tile-header">تاریخ</h1>
-                    <h2 class="tile-details">{{ .ServiceRequestDate }}</h2>
+                    <h2 class="tile-details">{{ .service_request_date }}</h2>
                 </div>
                 <div>
                     <h1 class="tile-header">ساعت</h1>
-                    <h2 class="tile-details">{{ .ServiceRequestTime }}</h2>
+                    <h2 class="tile-details">{{ .service_request_time }}</h2>
                 </div>
                 <div>
                     <h1 class="tile-header">وضعیت درخواست</h1>
-                    <h2 class="tile-details">{{ .ServiceRequestStatus }}</h2>
+                    <h2 class="tile-details">{{ .service_request_status }}</h2>
                 </div>
             </div>
         </div>
         <div class="info-box">
             <h1 class="tile-header">توضیحات</h1>
             <h2 class="tile-details">
-                {{ .ServiceRequestDetails }}
+                {{ .service_request_details }}
             </h2>
         </div>
     </div>

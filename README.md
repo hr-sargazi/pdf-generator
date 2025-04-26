@@ -1,28 +1,38 @@
 # PDF Generator Service
 
 ## Overview
-This project is a Go-based PDF generation service that converts HTML templates into PDF documents. It uses the `gin` framework to create a REST API, `chromedp` to render HTML and generate PDFs using Chromium, and Docker for containerization. The service accepts JSON input containing service request details and generates a PDF based on an HTML template.
+This project is a Go-based PDF generation service that converts HTML templates into PDF documents. It uses Go's native packages (`net/http`) to create a REST API and `chromedp` to render HTML and generate PDFs using Chromium. The service accepts a `multipart/form-data` request with an HTML template file and JSON data, renders the HTML with the provided data, and generates a PDF. The project follows a clean architecture pattern, separating concerns into layers (handlers, services, models, and infrastructure), and is containerized using Docker.
 
-The project is containerized and deployed as `reg.hamsaa.ir/pdf-generator:latest`.
+The service is deployed as `reg.hamsaa.ir/pdf-generator:latest`.
 
 ## Project Structure
 ```
 pdf-generator/
-├── templates/
-│   └── service_request.html  # HTML template for PDF rendering
-├── vendor/                   # Vendored Go dependencies
-├── docker-compose.yml        # Docker Compose configuration
-├── Dockerfile                # Docker build configuration
-├── go.mod                    # Go module dependencies
-├── go.sum                    # Go module checksums
-├── main.go                   # Main application code
-└── README.md                 # Project documentation
+├── internal/
+│   ├── handlers/          # HTTP handlers (presentation layer)
+│   │   └── pdf_handler.go
+│   ├── infrastructure/    # External dependencies (infrastructure layer)
+│   │   └── chromedp.go
+│   ├── models/            # Data models (domain layer)
+│   │   └── pdf_request.go
+│   ├── services/          # Business logic (application layer)
+│   │   └── pdf_service.go
+├── templates/             # Sample HTML templates (for testing)
+│   └── service_request.html
+├── vendor/                # Vendored Go dependencies
+├── docker-compose.yml     # Docker Compose configuration
+├── Dockerfile             # Docker build configuration
+├── go.mod                 # Go module dependencies
+├── go.sum                 # Go module checksums
+├── main.go                # Main application code
+└── README.md              # Project documentation
 ```
 
 ## Prerequisites
 - **Docker**: Required to build and run the containerized service.
 - **Docker Compose**: Required to manage the service using `docker-compose.yml`.
 - **curl** (optional): For testing the API endpoint.
+- **Postman** (optional): For testing the API endpoint with a GUI.
 
 ## Setup Instructions
 
@@ -74,70 +84,87 @@ docker-compose logs
 The service exposes a single endpoint for PDF generation:
 
 - **URL**: `POST /generate-pdf`
-- **Content-Type**: `application/json`
+- **Content-Type**: `multipart/form-data`
 - **Response**: PDF file (`application/pdf`)
 
 ### Request Body
-The endpoint expects a JSON payload with the following structure:
-```json
-{
-    "customer_name": "string",
-    "customer_number": "string",
-    "customer_banker_name": "string",
-    "customer_has_ubank_contract": "string",
-    "service_request_type": "string",
-    "service_request_title": "string",
-    "service_request_number": "string",
-    "service_request_date": "string",
-    "service_request_time": "string",
-    "service_request_status": "string",
-    "service_request_details": "string"
-}
+The endpoint expects a `multipart/form-data` request with the following fields:
+- `template_file`: An HTML template file (e.g., `service_request.html`) that defines the structure of the PDF.
+- `data`: A JSON string containing the data to populate the template.
+
+#### Example HTML Template (`service_request.html`)
+The `templates/service_request.html` file in the repository can be used as a template. It expects data fields like `customer_name`, `customer_number`, etc. Here’s a simplified example:
+```html
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <title>Service Request</title>
+    <style>
+        body { font-family: Arial, sans-serif; direction: rtl; text-align: right; }
+        .container { width: 100%; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { color: #3C4750; }
+        p { color: #576977; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{.customer_name}}</h1>
+        <p>شماره مشتری: {{.customer_number}}</p>
+        <p>{{.service_request_details}}</p>
+    </div>
+</body>
+</html>
 ```
 
-### Example Request
-Create a file named `request.json` with sample data:
+#### Example JSON Data
+The `data` field should be a JSON string matching the fields in your template:
 ```json
 {
-    "customer_name": "علی سلطانمهر",
+    "customer_name": "علی سامانیان",
     "customer_number": "679994AF9",
-    "customer_banker_name": "فرزاد براکی",
-    "customer_has_ubank_contract": "دارد",
-    "service_request_type": "درخواست",
-    "service_request_title": "انتقال وجه به سپرده ارزی شعبه سامان جهت تسویه مالیات",
+    "customer_banker_name": "فرداد درگاهی",
+    "customer_has_ubank_contract": "خیر",
+    "service_request_type": "انتقال وجه",
+    "service_request_title": "انتقال وجه به حساب سرمایه گذاری",
     "service_request_number": "139904110471",
     "service_request_date": "1399/04/10",
     "service_request_time": "11:50",
-    "service_request_status": "دروسافت",
-    "service_request_details": "انتقال وجه از سپرده دلاری شعبه سامان به حساب مالیاتی جهت تسویه مالیات با کد اقتصادی YAFADMFY YAFADMFY به مبلغ 1,000,000,000 ريال در تاریخ 1399/04/10"
+    "service_request_status": "تکمیل شده",
+    "service_request_details": "انتقال وجه از حساب سرمایه گذاری به حساب جاری شما با شماره حساب 1042049506 و مبلغ 1,000,000,000 ریال در تاریخ 1399/04/10 با کد رهگیری YAFADMYF YAFADMYF"
 }
 ```
 
-Send the request using `curl`:
+### Testing with Postman
+1. **Create a New Request in Postman**:
+   - Open Postman and create a new request.
+   - Set the method to `POST`.
+   - Set the URL to `http://localhost:8080/generate-pdf`.
+
+2. **Configure the Request Body**:
+   - Go to the **Body** tab and select `form-data`.
+   - Add two key-value pairs:
+     - Key: `template_file`, Value: Select the `service_request.html` file from your local system.
+     - Key: `data`, Value: Paste the JSON string (as text):
+       ```json
+       {"customer_name":"علی سامانیان","customer_number":"679994AF9","customer_banker_name":"فرداد درگاهی","customer_has_ubank_contract":"خیر","service_request_type":"انتقال وجه","service_request_title":"انتقال وجه به حساب سرمایه گذاری","service_request_number":"139904110471","service_request_date":"1399/04/10","service_request_time":"11:50","service_request_status":"تکمیل شده","service_request_details":"انتقال وجه از حساب سرمایه گذاری به حساب جاری شما با شماره حساب 1042049506 و مبلغ 1,000,000,000 ریال در تاریخ 1399/04/10 با کد رهگیری YAFADMYF YAFADMYF"}
+       ```
+
+3. **Send the Request**:
+   - Click the **Send** button.
+   - Postman will send the request, and you should receive a PDF file in the response.
+
+4. **Save the Response**:
+   - Click **Save Response** and choose **Save to a file** to save the PDF as `dynamic_document.pdf`.
+   - Open the PDF to verify the content.
+
+### Testing with `curl`
+You can also test the endpoint using `curl`:
 ```bash
 curl -X POST http://localhost:8080/generate-pdf \
-    -H "Content-Type: application/json" \
-    -d @request.json \
-    --output service_request.pdf
-```
-
-### Response
-The response will be a PDF file named `service_request.pdf`. Open the file to verify the content.
-
-## Testing in Docker
-The service is designed to run in a Docker environment with Chromium for PDF rendering. The `docker-compose.yml` file simplifies management.
-
-### Start the Service
-```bash
-docker-compose up -d
-```
-
-### Test the Endpoint
-Use the `curl` command above to test the `/generate-pdf` endpoint.
-
-### Stop the Service
-```bash
-docker-compose down
+    -F "template_file=@/path/to/service_request.html" \
+    -F "data={\"customer_name\":\"علی سامانیان\",\"customer_number\":\"679994AF9\",\"customer_banker_name\":\"فرداد درگاهی\",\"customer_has_ubank_contract\":\"خیر\",\"service_request_type\":\"انتقال وجه\",\"service_request_title\":\"انتقال وجه به حساب سرمایه گذاری\",\"service_request_number\":\"139904110471\",\"service_request_date\":\"1399/04/10\",\"service_request_time\":\"11:50\",\"service_request_status\":\"تکمیل شده\",\"service_request_details\":\"انتقال وجه از حساب سرمایه گذاری به حساب جاری شما با شماره حساب 1042049506 و مبلغ 1,000,000,000 ریال در تاریخ 1399/04/10 با کد رهگیری YAFADMYF YAFADMYF\"}" \
+    --output dynamic_document.pdf
 ```
 
 ## Debugging
@@ -149,12 +176,10 @@ docker-compose down
   ```bash
   docker exec -it pdf-generator sh
   ```
-- **Font Issues**: If Persian characters are not rendered correctly, ensure the `Vazir` font is included in the Docker image and referenced in `service_request.html`.
-
 ## Notes
 - The service requires Chromium to generate PDFs. The `CHROME_PATH` environment variable is set in `docker-compose.yml` to point to `/usr/bin/chromium-browser`.
-- The `service_request.html` template uses the `Vazir` font for Persian text. Ensure the font is available in the container for accurate rendering.
 - The generated PDFs are in A4 format (8.27 x 11.69 inches) with the background included.
+- The service uses Go’s native `net/http` package for HTTP handling, following a clean architecture pattern.
 
 ## License
 This project is licensed under the MIT License. See the `LICENSE` file for details (if applicable).
