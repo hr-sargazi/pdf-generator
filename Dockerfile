@@ -1,7 +1,10 @@
-# Use a base image with Go pre-installed
-FROM golang:1.22 AS builder
+# Stage 1: Build the Go application
+FROM golang:1.24-alpine AS builder
 
-# Set working directory
+# Install build dependencies
+RUN apk add --no-cache git
+
+# Set the working directory
 WORKDIR /app
 
 # Copy go.mod and go.sum to download dependencies
@@ -11,58 +14,36 @@ RUN go mod download
 # Copy the source code
 COPY . .
 
-# Build the Go binary
-RUN CGO_ENABLED=0 GOOS=linux go build -o pdf-service
+# Build the Go application
+RUN go build -o main .
 
-# Use a smaller base image for the final build, including Chromium
-FROM ubuntu:22.04
+# Stage 2: Create the final image
+FROM alpine:latest
 
-# Install Chromium and dependencies
-RUN apt-get update && apt-get install -y \
-    chromium-browser \
-    fonts-liberation \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libcairo2 \
-    libcups2 \
-    libdbus-1-3 \
-    libexpat1 \
-    libfontconfig1 \
-    libgbm1 \
-    libgdk-pixbuf-2.0-0 \
-    libglib2.0-0 \
-    libgtk-3-0 \
-    libnspr4 \
-    libnss3 \
-    libpango-1.0-0 \
-    libpangocairo-1.0-0 \
-    libx11-6 \
-    libx11-xcb1 \
-    libxcb1 \
-    libxcomposite1 \
-    libxcursor1 \
-    libxdamage1 \
-    libxext6 \
-    libxfixes3 \
-    libxi6 \
-    libxrandr2 \
-    libxrender1 \
-    libxss1 \
-    libxtst6 \
-    && rm -rf /var/lib/apt/lists/*
+# Install Chromium and dependencies for chromedp
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    fontconfig
 
-# Copy the Go binary from the builder stage
-COPY --from=builder /app/pdf-service /app/pdf-service
+# Copy the built binary from the builder stage
+COPY --from=builder /app/main /app/main
 
-# Copy static files (fonts and logo)
-COPY static /app/static
+# Copy the templates directory
+COPY --from=builder /app/templates /app/templates
 
-# Set working directory
+# Set the working directory
 WORKDIR /app
+
+# Set environment variable for Chromium path
+ENV CHROME_PATH=/usr/bin/chromium-browser
 
 # Expose port 8080
 EXPOSE 8080
 
-# Command to run the service
-CMD ["./pdf-service"]
+# Run the application
+CMD ["./main"]
