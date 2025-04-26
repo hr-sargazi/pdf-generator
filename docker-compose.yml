@@ -5,14 +5,14 @@ services:
     image: reg.hamsaa.ir/pdf-generator:latest
     container_name: pdf-generator
     ports:
-      - "8080:8080"  # Map host port 8080 to container port 8080
+      - "8080:8080"
     environment:
       - CHROME_PATH=/usr/bin/chromium-browser
     volumes:
-      - ./output:/app/output  # Optional: Mount a volume to save generated PDFs
+      - ./output:/app/output
     networks:
       - pdf-network
-    restart: unless-stopped  # Restart the container unless explicitly stopped
+    restart: unless-stopped
 
 networks:
   pdf-network:
