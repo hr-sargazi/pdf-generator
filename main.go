@@ -10,9 +10,7 @@ import (
 
 func main() {
 	chromedpClient := infrastructure.NewChromedpClient()
-
 	pdfService := services.NewPDFService(chromedpClient)
-
 	pdfHandler := handlers.NewPDFHandler(pdfService)
 
 	http.HandleFunc("/generate-pdf", pdfHandler.GeneratePDFHandler)

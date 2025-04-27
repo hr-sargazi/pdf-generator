@@ -8,25 +8,31 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
+type PDFGenerator interface {
+	GeneratePDF(htmlContent string) ([]byte, error)
+}
 
 type ChromedpClient struct {
 	chromePath string
 }
 
+type StatFunc func(string) (os.FileInfo, error)
 
-func NewChromedpClient() *ChromedpClient {
+func NewChromedpClientWithStat(stat StatFunc) *ChromedpClient {
 	chromePath := "/usr/bin/chromium-browser"
 	if os.Getenv("CHROME_PATH") != "" {
 		chromePath = os.Getenv("CHROME_PATH")
-	} else if _, err := os.Stat("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"); err == nil {
+	} else if _, err := stat("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"); err == nil {
 		chromePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 	}
 	return &ChromedpClient{chromePath: chromePath}
 }
 
+func NewChromedpClient() *ChromedpClient {
+	return NewChromedpClientWithStat(os.Stat)
+}
 
 func (c *ChromedpClient) GeneratePDF(htmlContent string) ([]byte, error) {
-
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.ExecPath(c.chromePath),
 		chromedp.Flag("headless", true),

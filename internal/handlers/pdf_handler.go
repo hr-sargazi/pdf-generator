@@ -9,10 +9,10 @@ import (
 )
 
 type PDFHandler struct {
-	pdfService *services.PDFService
+	pdfService services.PDFServiceInterface
 }
 
-func NewPDFHandler(pdfService *services.PDFService) *PDFHandler {
+func NewPDFHandler(pdfService services.PDFServiceInterface) *PDFHandler {
 	return &PDFHandler{pdfService: pdfService}
 }
 

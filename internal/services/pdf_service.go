@@ -8,15 +8,16 @@ import (
 )
 
 
+type PDFServiceInterface interface {
+	GeneratePDF(req *models.PDFRequest) ([]byte, error)
+}
 type PDFService struct {
-	chromedpClient *infrastructure.ChromedpClient
+	chromedpClient infrastructure.PDFGenerator
 }
 
-
-func NewPDFService(chromedpClient *infrastructure.ChromedpClient) *PDFService {
+func NewPDFService(chromedpClient infrastructure.PDFGenerator) *PDFService {
 	return &PDFService{chromedpClient: chromedpClient}
 }
-
 
 func (s *PDFService) GeneratePDF(req *models.PDFRequest) ([]byte, error) {
 	if req.HTMLTemplate == "" {
@@ -39,7 +40,6 @@ func (s *PDFService) GeneratePDF(req *models.PDFRequest) ([]byte, error) {
 	return s.chromedpClient.GeneratePDF(renderedHTML.String())
 }
 
-// Custom errors
 var (
 	ErrEmptyHTMLTemplate = &AppError{Message: "HTML template cannot be empty"}
 	ErrNilData           = &AppError{Message: "Data cannot be nil"}
