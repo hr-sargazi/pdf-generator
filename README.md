@@ -3,7 +3,7 @@
 ## Overview
 This project is a Go-based PDF generation service that converts HTML templates into PDF documents. It uses Go's native packages (`net/http`) to create a REST API and `chromedp` to render HTML and generate PDFs using Chromium. The service accepts a `multipart/form-data` request with an HTML template file and JSON data, renders the HTML with the provided data, and generates a PDF. The project follows a clean architecture pattern, separating concerns into layers (handlers, services, models, and infrastructure), and is containerized using Docker.
 
-The service includes comprehensive unit and integration tests to ensure reliability and correctness. Tests are executed as part of the Docker build process to catch issues early. The service is deployed as `reg.hamsaa.ir/pdf-generator:latest`.
+The service includes comprehensive unit and integration tests to ensure reliability and correctness. Tests are executed as part of the Docker build process to catch issues early. The service is deployed as `pdf-generator:latest`.
 
 ## Project Structure
 ```
@@ -51,7 +51,7 @@ cd pdf-generator
 ### 2. Build the Docker Image (Optional)
 If you need to rebuild the image locally, ensure you have the `Dockerfile` and run:
 ```bash
-docker build -t reg.hamsaa.ir/pdf-generator:latest .
+docker build -t pdf-generator:latest .
 ```
 
 This command will:
@@ -61,12 +61,7 @@ This command will:
 
 Alternatively, you can pull the pre-built image from the registry:
 ```bash
-docker pull reg.hamsaa.ir/pdf-generator:latest
-```
-
-If the registry requires authentication:
-```bash
-docker login reg.hamsaa.ir
+docker pull pdf-generator:latest
 ```
 
 ### 3. Run the Service with Docker Compose
@@ -146,7 +141,7 @@ The Dockerfile includes a testing step in the builder stage:
 
 Example build command:
 ```bash
-docker build -t reg.hamsaa.ir/pdf-generator:latest .
+docker build -t pdf-generator:latest .
 ```
 
 If tests fail, the build output will show the failure details, allowing you to debug and fix issues before deployment.
